@@ -31,7 +31,7 @@ const platformsConfig = [
         name: 'CodeChef',
         urlPrefix: 'codechef.com/users/',
         // Using a reliable high-res alternative for CodeChef
-        logo: 'https://i.pinimg.com/originals/c5/d9/fc/c5d9fc1e18bcf039f464c2ab6cb860f4.png',
+        logo: 'data:image/jpeg;base64,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',
         theme: 'focus:border-amber-700 focus:ring-amber-700/20',
     },
     {
@@ -171,10 +171,15 @@ const StudentOnboarding = () => {
                         const username = usernames[platform.id];
 
                         return (
-                            <div key={platform.id} className="group flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-500/50 hover:shadow-md dark:hover:shadow-indigo-500/10 transition-all bg-white dark:bg-slate-800/50">
+                            <div
+                                key={platform.id}
+                                className="group flex items-center gap-6 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 
+                                hover:border-indigo-300 dark:hover:border-indigo-500/50 hover:shadow-md 
+                                dark:hover:shadow-indigo-500/10 transition-all bg-white dark:bg-slate-800/50"
+                            >
 
                                 {/* Logo & Name */}
-                                <div className="flex items-center gap-4 sm:w-48 shrink-0">
+                                <div className="flex items-center gap-4 w-44 shrink-0">
                                     <div className="w-12 h-12 rounded-xl bg-white border border-slate-100 dark:border-slate-700 shadow-sm flex items-center justify-center overflow-hidden shrink-0 p-2">
                                         <img src={platform.logo} alt={platform.name} className="w-full h-full object-contain" />
                                     </div>
@@ -182,11 +187,11 @@ const StudentOnboarding = () => {
                                 </div>
 
                                 {/* Input Area */}
-                                <div className="flex-1 relative">
+                                <div className="w-full max-w-md">
                                     <div className="flex rounded-xl shadow-sm ring-1 ring-inset ring-slate-300 dark:ring-slate-700 focus-within:ring-2 focus-within:ring-inset overflow-hidden bg-slate-50 dark:bg-slate-900 transition-shadow">
-                                        <span className="flex select-none items-center pl-4 pr-2 text-slate-400 sm:text-sm bg-transparent">
+                                        {/* <span className="flex select-none items-center pl-4 pr-2 text-slate-400 sm:text-sm bg-transparent">
                                             {platform.urlPrefix}
-                                        </span>
+                                        </span> */}
                                         <input
                                             type="text"
                                             value={username}
@@ -198,43 +203,69 @@ const StudentOnboarding = () => {
                                     </div>
 
                                     {/* Error Message */}
-                                    {status === 'error' && (
-                                        <p className="absolute -bottom-5 left-2 text-xs text-red-500 font-medium flex items-center gap-1">
-                                            <AlertCircle className="w-3 h-3" /> {errors[platform.id]}
-                                        </p>
-                                    )}
+                                    <div className="min-h-[18px] mt-1">
+                                        {status === "error" && (
+                                            <p className="text-xs text-red-500 font-medium flex items-center gap-1">
+                                                <AlertCircle className="w-3 h-3" />
+                                                {errors[platform.id]}
+                                            </p>
+                                        )}
+                                    </div>
                                 </div>
 
                                 {/* Action Button / Status */}
-                                <div className="sm:w-32 shrink-0 flex justify-end">
-                                    {status === 'idle' && (
+                                <div className="w-32 shrink-0 flex justify-end">
+                                    {status === "idle" && (
                                         <button
                                             onClick={() => handleVerify(platform.id)}
                                             disabled={!username.trim()}
-                                            className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                                            className="w-full h-10 px-4 rounded-xl text-sm font-medium
+                                                    text-slate-700 dark:text-slate-200
+                                                    bg-slate-100 dark:bg-slate-700
+                                                    hover:bg-slate-200 dark:hover:bg-slate-600
+                                                    disabled:opacity-50 disabled:cursor-not-allowed
+                                                    transition-colors flex items-center justify-center gap-2"
                                         >
-                                            <LinkIcon className="w-4 h-4" /> Verify
+                                            <LinkIcon className="w-4 h-4" />
+                                            Verify
                                         </button>
                                     )}
 
-                                    {status === 'loading' && (
-                                        <div className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-sm font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center gap-2">
-                                            <Loader2 className="w-4 h-4 animate-spin" /> Verifying...
+                                    {status === "loading" && (
+                                        <div className="w-full h-10 px-4 rounded-xl text-sm font-medium
+                                                    text-indigo-600 dark:text-indigo-400
+                                                    bg-indigo-50 dark:bg-indigo-500/10
+                                                    flex items-center justify-center gap-2">
+                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                            Verifying...
                                         </div>
                                     )}
 
-                                    {status === 'success' && (
-                                        <div className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-sm font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center gap-2 border border-emerald-200 dark:border-emerald-500/20">
-                                            <CheckCircle2 className="w-4 h-4" /> Verified
+                                    {status === "success" && (
+                                        <div className="w-full h-10 px-4 rounded-xl text-sm font-medium
+                                                    text-emerald-600 dark:text-emerald-400
+                                                    bg-emerald-50 dark:bg-emerald-500/10
+                                                    border border-emerald-200 dark:border-emerald-500/20
+                                                    flex items-center justify-center gap-2">
+                                            <CheckCircle2 className="w-4 h-4" />
+                                            Verified
                                         </div>
                                     )}
 
-                                    {status === 'error' && (
+                                    {status === "error" && (
                                         <button
-                                            onClick={() => setStatuses(prev => ({ ...prev, [platform.id]: 'idle' }))}
-                                            className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors flex items-center justify-center gap-2 border border-red-200 dark:border-red-500/20"
+                                            onClick={() =>
+                                                setStatuses(prev => ({ ...prev, [platform.id]: "idle" }))
+                                            }
+                                            className="w-full h-10 px-4 rounded-xl text-sm font-medium
+                                                        text-red-600 dark:text-red-400
+                                                        bg-red-50 dark:bg-red-500/10
+                                                        hover:bg-red-100 dark:hover:bg-red-500/20
+                                                        border border-red-200 dark:border-red-500/20
+                                                        transition-colors flex items-center justify-center gap-2"
                                         >
-                                            <XCircle className="w-4 h-4" /> Retry
+                                            <XCircle className="w-4 h-4" />
+                                            Retry
                                         </button>
                                     )}
                                 </div>

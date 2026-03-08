@@ -10,23 +10,31 @@ export function cn(...inputs) {
 
 
 
-export function Layout({ children, role }) {
+export function Layout({ children, role: propsRole }) {
   const location = useLocation();
+  const role = propsRole || localStorage.getItem('role') || 'student';
 
   const studentLinks = [
     { name: 'Dashboard', href: '/student', icon: LayoutDashboard },
-    { name: 'Leaderboard', href: '/student/leaderboard', icon: Trophy },
+    { name: 'Leaderboard', href: '/leaderboard', icon: Trophy },
     { name: 'AI Suggestions', href: '/student/suggestions', icon: Lightbulb },
     { name: 'Profile', href: '/student/profile', icon: User },
   ];
 
   const mentorLinks = [
-    { name: 'Class Dashboard', href: '/mentor', icon: LayoutDashboard },
-    { name: 'Batches', href: '/mentor/batches', icon: Users },
+    { name: 'Dashboard', href: '/mentor', icon: LayoutDashboard },
+    { name: 'Batch Explorer', href: '/batches', icon: Users },
+    { name: 'Leaderboard', href: '/leaderboard', icon: Trophy },
     { name: 'Alerts', href: '/mentor/alerts', icon: Bell },
   ];
 
-  const links = role === 'student' ? studentLinks : mentorLinks;
+  const links = role === 'mentor' ? mentorLinks : studentLinks;
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    window.location.href = '/';
+  };
 
   return (
     <div className="flex h-screen bg-slate-50 text-slate-900 font-sans">
@@ -71,13 +79,13 @@ export function Layout({ children, role }) {
         </nav>
 
         <div className="p-4 border-t border-slate-200">
-          <Link
-            to="/"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-red-600 transition-colors"
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-red-600 transition-colors"
           >
             <LogOut className="w-5 h-5 text-slate-400" />
             Sign Out
-          </Link>
+          </button>
         </div>
       </aside>
 

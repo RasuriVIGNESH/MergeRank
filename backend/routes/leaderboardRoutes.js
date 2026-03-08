@@ -5,7 +5,8 @@ const {
     getLeetcodeLeaderboard,
     getCodeforcesLeaderboard,
     getCodechefLeaderboard,
-    getGithubLeaderboard
+    getGithubLeaderboard,
+    getOverallLeaderboard
 } = require("../controllers/leaderboardController");
 
 router.get("/leetcode", getLeetcodeLeaderboard);
@@ -15,5 +16,7 @@ router.get("/codeforces", getCodeforcesLeaderboard);
 router.get("/codechef", getCodechefLeaderboard);
 
 router.get("/github", getGithubLeaderboard);
+
+router.get("/overall", getOverallLeaderboard);
 
 module.exports = router;

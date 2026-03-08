@@ -23,6 +23,7 @@ export const authService = {
     const response = await api.post('/auth/register', userData);
     if (response.data.token) {
       localStorage.setItem('token', response.data.token);
+      localStorage.setItem('role', response.data.role || 'student');
     }
     return response.data;
   },
@@ -31,6 +32,7 @@ export const authService = {
     const response = await api.post('/auth/login', credentials);
     if (response.data.token) {
       localStorage.setItem('token', response.data.token);
+      localStorage.setItem('role', response.data.role);
     }
     return response.data;
   },
@@ -42,17 +44,14 @@ export const authService = {
 
   logout() {
     localStorage.removeItem('token');
+    localStorage.removeItem('role');
   }
 };
 
 export const studentService = {
-  async getStudentProfile() {
-    const response = await api.get('/student/stats');
-    return response.data;
-  },
-
-  async getBatchLeaderboard(platform = 'leetcode') {
-    const response = await api.get(`/leaderboard/${platform}`);
+  async getStudentProfile(studentId = null) {
+    const url = studentId ? `/student/stats/${studentId}` : '/student/stats';
+    const response = await api.get(url);
     return response.data;
   },
 
@@ -82,34 +81,35 @@ export const studentService = {
   }
 };
 
-export const mentorService = {
-  async createBatch(batchData) {
-    const response = await api.post('/batches', batchData);
-    return response.data;
-  },
-
+export const batchService = {
   async getBatches() {
     const response = await api.get('/batches');
     return response.data;
   },
 
-  async getBatchDetails(batchId) {
-    const response = await api.get(`/batches/${batchId}`);
+  async getBatchStudents(branch, year) {
+    const response = await api.get(`/batches/${branch}/${year}`);
     return response.data;
-  },
+  }
+};
 
-  async addStudentToBatch(batchId, userId) {
-    const response = await api.post('/batches/add-student', { batchId, userId });
+export const leaderboardService = {
+  async getLeaderboard(platform, branch = '', year = '') {
+    const params = {};
+    if (branch) params.branch = branch;
+    if (year) params.year = year;
+
+    // Check if overall or platform specific
+    const endpoint = platform === 'overall' ? '/leaderboard/overall' : `/leaderboard/${platform}`;
+    const response = await api.get(endpoint, { params });
     return response.data;
-  },
+  }
+};
 
-  async removeStudentFromBatch(batchId, userId) {
-    const response = await api.delete('/batches/remove-student', { data: { batchId, userId } });
-    return response.data;
-  },
-
+export const mentorService = {
   async getMentorDashboard() {
     const response = await api.get('/mentor/dashboard');
     return response.data;
   }
 };
+

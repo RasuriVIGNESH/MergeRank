@@ -8,7 +8,7 @@ export function MentorAlerts() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    mentorService.getMentorDashboard('m1').then(res => {
+    mentorService.getMentorDashboard().then(res => {
       setData(res);
       setLoading(false);
     });
@@ -20,7 +20,7 @@ export function MentorAlerts() {
     const lastActive = new Date(s.lastActive);
     const now = new Date('2026-03-04T08:00:00Z'); // Mock current time
     const diffTime = Math.abs(now.getTime() - lastActive.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays > 7;
   });
 

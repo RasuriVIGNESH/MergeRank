@@ -184,16 +184,20 @@ exports.syncPlatformData = async (req, res) => {
 // GET /api/student/stats
 exports.getStudentStats = async (req, res) => {
     try {
+        const studentId = req.params.id || req.user._id;
 
-        const user = await User.findById(req.user._id).select("platforms name email batch aiSuggestions placementScore activityScore consistencyScore");
+        const user = await User.findById(studentId).select("platforms name email branch gradYear batch aiSuggestions placementScore activityScore consistencyScore");
 
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
 
         res.json({
+            id: user._id,
             name: user.name,
             email: user.email,
+            branch: user.branch,
+            gradYear: user.gradYear,
             batch: user.batch,
             platforms: user.platforms,
             aiSuggestions: user.aiSuggestions || [],

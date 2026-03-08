@@ -21,8 +21,11 @@ router.put("/platforms", protect, updatePlatforms);
 // sync platform data
 router.post("/sync", protect, syncPlatformData);
 
-// get student stats
+// get student stats (own profile)
 router.get("/stats", protect, getStudentStats);
+
+// get specific student stats (mentor view)
+router.get("/stats/:id", protect, getStudentStats);
 
 // analytics
 router.get("/analytics", protect, getAnalytics);

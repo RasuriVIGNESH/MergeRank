@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Layout } from '../components/Layout';
 import { studentService } from '../services/api';
-import { Github, Code2, Trophy, Award, BookOpen, Star, RefreshCw } from 'lucide-react';
+import { useParams } from 'react-router-dom';
+import { Github, Code2, Trophy, Award, BookOpen, Star, RefreshCw, Users } from 'lucide-react';
 
 export function StudentProfile() {
+  const { id } = useParams();
   const [student, setStudent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [syncLoading, setSyncLoading] = useState(false);
@@ -12,7 +14,7 @@ export function StudentProfile() {
 
   const fetchProfile = async () => {
     try {
-      const data = await studentService.getStudentProfile();
+      const data = await studentService.getStudentProfile(id);
       setStudent(data);
     } catch (err) {
       console.error(err);
@@ -23,7 +25,7 @@ export function StudentProfile() {
 
   useEffect(() => {
     fetchProfile();
-  }, []);
+  }, [id]);
 
   const handleSync = async () => {
     if (syncLoading) return;
@@ -68,13 +70,13 @@ export function StudentProfile() {
     }
   };
 
-  if (loading) return <Layout role="student"><div className="flex items-center justify-center h-full"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div></div></Layout>;
-  if (!student) return <Layout role="student"><div className="text-center p-10"><h2 className="text-xl font-bold">Failed to load profile.</h2></div></Layout>;
+  if (loading) return <Layout><div className="flex items-center justify-center h-full"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div></div></Layout>;
+  if (!student) return <Layout><div className="text-center p-10"><h2 className="text-xl font-bold">Failed to load profile.</h2></div></Layout>;
 
   // Merge default values to prevent crashes from missing DB fields
   const safePlatforms = student.platforms || {
     leetcode: { easy: 0, medium: 0, hard: 0, totalSolved: 0, lastSynced: null },
-    github: { followers: 0, publicRepos: 0, totalStars: 0, lastSynced: null },
+    github: { totalContributions: 0, publicRepos: 0, totalStars: 0, lastSynced: null },
     codeforces: { rating: 0, rank: 'N/A', solved: 0, lastSynced: null },
     codechef: { rating: 0, stars: '0*', solved: 0, lastSynced: null },
     hackerrank: { badges: 0, certificates: 0, solved: 0, lastSynced: null }
@@ -108,7 +110,7 @@ export function StudentProfile() {
       bg: 'bg-slate-100',
       border: 'border-slate-200',
       stats: [
-        { label: 'Followers', value: safePlatforms.github?.followers || 0 },
+        { label: 'Contributions', value: safePlatforms.github?.totalContributions || 0 },
         { label: 'Repos', value: safePlatforms.github?.publicRepos || 0 },
         { label: 'Stars', value: safePlatforms.github?.totalStars || 0 }
       ],
@@ -165,21 +167,57 @@ export function StudentProfile() {
   ];
 
   return (
-    <Layout role="student">
-      <div className="space-y-6">
+    <Layout>
+      <div className="space-y-8">
+        {/* User Details Section */}
+        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="p-8 flex flex-col md:flex-row items-center gap-8 bg-gradient-to-br from-indigo-50/50 to-white">
+            <div className="w-24 h-24 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-4xl font-bold shadow-xl shadow-indigo-200 shrink-0">
+              {student.name ? student.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : '??'}
+            </div>
+            <div className="flex-1 text-center md:text-left">
+              <h2 className="text-3xl font-bold text-slate-900 mb-1">{student.name}</h2>
+              <div className="flex flex-wrap justify-center md:justify-start items-center gap-4 mt-3">
+                <div className="flex items-center gap-2 text-slate-600 bg-white px-3 py-1.5 rounded-lg border border-slate-100 shadow-sm text-sm">
+                  <RefreshCw className="w-4 h-4 text-indigo-500" />
+                  <span className="font-medium">{student.email}</span>
+                </div>
+                {student.branch && (
+                  <div className="flex items-center gap-2 text-slate-600 bg-white px-3 py-1.5 rounded-lg border border-slate-100 shadow-sm text-sm">
+                    <span className="font-medium">{student.branch}-{student.gradYear}</span>
+                  </div>
+                )}
+                <div className="flex items-center gap-2 text-slate-600 bg-white px-3 py-1.5 rounded-lg border border-slate-100 shadow-sm text-sm">
+                  <Users className="w-4 h-4 text-indigo-500" />
+                  <span className="font-medium">Batch: {student.batch || (student.branch && student.gradYear ? `${student.branch}-${student.gradYear}` : 'Unassigned')}</span>
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-col items-center md:items-end gap-2">
+              <div className="px-4 py-2 bg-emerald-50 text-emerald-700 rounded-xl font-bold border border-emerald-100 flex items-center gap-2">
+                <Trophy className="w-5 h-5" />
+                Score: {student.placementReadiness || 0}
+              </div>
+              <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400">Student Profile</p>
+            </div>
+          </div>
+        </div>
+
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-slate-900">Platform Integrations</h2>
             <p className="text-slate-500 mt-1">Manage your connected accounts and sync data.</p>
           </div>
-          <button
-            onClick={handleSync}
-            disabled={syncLoading}
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 rounded-xl font-medium hover:bg-indigo-100 transition-colors disabled:opacity-50"
-          >
-            <RefreshCw className={`w-4 h-4 ${syncLoading ? 'animate-spin' : ''}`} />
-            {syncLoading ? 'Syncing...' : 'Sync All Now'}
-          </button>
+          {!id && (
+            <button
+              onClick={handleSync}
+              disabled={syncLoading}
+              className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 rounded-xl font-medium hover:bg-indigo-100 transition-colors disabled:opacity-50"
+            >
+              <RefreshCw className={`w-4 h-4 ${syncLoading ? 'animate-spin' : ''}`} />
+              {syncLoading ? 'Syncing...' : 'Sync All Now'}
+            </button>
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -214,13 +252,15 @@ export function StudentProfile() {
                   </div>
                   <div className="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
                     <span>Last synced: {platform.lastSynced ? new Date(platform.lastSynced).toLocaleString() : 'Not synced'}</span>
-                    <button
-                      onClick={handleSync}
-                      disabled={syncLoading}
-                      className="font-medium text-indigo-600 hover:text-indigo-700 disabled:opacity-50"
-                    >
-                      {syncLoading ? '...' : 'Sync'}
-                    </button>
+                    {!id && (
+                      <button
+                        onClick={handleSync}
+                        disabled={syncLoading}
+                        className="font-medium text-indigo-600 hover:text-indigo-700 disabled:opacity-50"
+                      >
+                        {syncLoading ? '...' : 'Sync'}
+                      </button>
+                    )}
                   </div>
                 </div>
               ) : (

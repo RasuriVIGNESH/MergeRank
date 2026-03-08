@@ -9,7 +9,7 @@ export function MentorDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    mentorService.getMentorDashboard('m1').then(res => {
+    mentorService.getMentorDashboard().then(res => {
       setData(res);
       setLoading(false);
     });

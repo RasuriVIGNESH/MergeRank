@@ -15,6 +15,8 @@ import { MentorDashboard } from './pages/MentorDashboard';
 import { MentorBatches } from './pages/MentorBatches';
 import { MentorAlerts } from './pages/MentorAlerts';
 import StudentOnboarding from './pages/StudentOnboarding';
+import BatchExplorer from './pages/BatchExplorer';
+import BatchStudents from './pages/BatchStudents';
 
 export default function App() {
   return (
@@ -28,14 +30,19 @@ export default function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/onboarding" element={<StudentOnboarding />} />
 
-        {/* Student Routes */}
+        {/* Core Routes */}
         <Route path="/student" element={<StudentDashboard />} />
-        <Route path="/student/leaderboard" element={<Leaderboard />} />
-        <Route path="/student/suggestions" element={<Suggestions />} />
-        <Route path="/student/profile" element={<StudentProfile />} />
-
-        {/* Mentor Routes */}
         <Route path="/mentor" element={<MentorDashboard />} />
+
+        <Route path="/leaderboard" element={<Leaderboard />} />
+        <Route path="/batches" element={<BatchExplorer />} />
+        <Route path="/batches/:branch/:year" element={<BatchStudents />} />
+
+        {/* Student Specific */}
+        <Route path="/student/suggestions" element={<Suggestions />} />
+        <Route path="/student/profile/:id?" element={<StudentProfile />} />
+
+        {/* Mentor Specific */}
         <Route path="/mentor/batches" element={<MentorBatches />} />
         <Route path="/mentor/alerts" element={<MentorAlerts />} />
 
