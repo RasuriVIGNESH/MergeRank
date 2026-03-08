@@ -10,7 +10,7 @@ const Register = () => {
     const [showConfirm, setShowConfirm] = useState(false);
     const [formData, setFormData] = useState({
         firstName: '', lastName: '', email: '',
-        gradYear: '', branch: '', batchCode: '',
+        college: '', gradYear: '', branch: '', batchCode: '',
         password: '', confirmPassword: '',
     });
     const [error, setError] = useState('');
@@ -49,11 +49,11 @@ const Register = () => {
                 gradYear: formData.gradYear,
                 branch: formData.branch,
                 batch: formData.batchCode,
-                college: 'Default' // Adding explicit mapping since the backend expects college and batch
+                college: formData.college
             };
 
             await authService.register(userData);
-            navigate('/student');
+            navigate('/onboarding');
         } catch (err) {
             setError(err.response?.data?.message || 'Registration failed. Please try again.');
         } finally {
@@ -180,6 +180,14 @@ const Register = () => {
                             {/* Email */}
                             <Field label="College Email" isDark={isDark} labelCls={labelCls}>
                                 <input type="email" name="email" required value={formData.email} onChange={handleChange} placeholder="you@college.edu" className={inputClass} />
+                            </Field>
+
+                            {/* College */}
+                            <Field label="College" isDark={isDark} labelCls={labelCls}>
+                                <select name="college" required value={formData.college} onChange={handleChange} className={inputClass}>
+                                    <option value="" disabled>Select College</option>
+                                    {['Woxsen'].map(c => <option key={c} value={c}>{c}</option>)}
+                                </select>
                             </Field>
 
                             {/* Academic */}

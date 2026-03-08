@@ -74,6 +74,11 @@ export const studentService = {
   async updatePlatforms(platforms) {
     const response = await api.put('/student/platforms', platforms);
     return response.data;
+  },
+
+  async verifyPlatform(platform, username) {
+    const response = await api.post('/student/verify', { platform, username });
+    return response.data;
   }
 };
 

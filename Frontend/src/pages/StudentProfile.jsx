@@ -7,6 +7,8 @@ export function StudentProfile() {
   const [student, setStudent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [syncLoading, setSyncLoading] = useState(false);
+  const [newPlatformInputs, setNewPlatformInputs] = useState({});
+  const [connectingPlatform, setConnectingPlatform] = useState(null);
 
   const fetchProfile = async () => {
     try {
@@ -36,47 +38,87 @@ export function StudentProfile() {
     }
   };
 
+  const handleConnect = async (platformId) => {
+    const username = newPlatformInputs[platformId];
+    if (!username) return;
+    setConnectingPlatform(platformId);
+    try {
+      const verifyRes = await studentService.verifyPlatform(platformId, username);
+      if (!verifyRes.isValid) {
+        alert(verifyRes.message || "Invalid username");
+        setConnectingPlatform(null);
+        return;
+      }
+      const updatedPlatforms = {
+        leetcode: safePlatforms.leetcode?.username || null,
+        github: safePlatforms.github?.username || null,
+        codeforces: safePlatforms.codeforces?.username || null,
+        codechef: safePlatforms.codechef?.username || null,
+        hackerrank: safePlatforms.hackerrank?.username || null,
+        [platformId]: username
+      };
+      await studentService.updatePlatforms(updatedPlatforms);
+      await studentService.syncData();
+      await fetchProfile();
+      setNewPlatformInputs(prev => ({ ...prev, [platformId]: '' }));
+    } catch (err) {
+      alert("Failed to connect: " + (err.response?.data?.message || err.message));
+    } finally {
+      setConnectingPlatform(null);
+    }
+  };
+
   if (loading) return <Layout role="student"><div className="flex items-center justify-center h-full"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div></div></Layout>;
   if (!student) return <Layout role="student"><div className="text-center p-10"><h2 className="text-xl font-bold">Failed to load profile.</h2></div></Layout>;
 
   // Merge default values to prevent crashes from missing DB fields
   const safePlatforms = student.platforms || {
-    leetcode: { rating: 0, streak: 0, totalSolved: 0, lastSynced: new Date() },
-    github: { totalCommits: 0, repos: 0, stars: 0, lastSynced: new Date() },
-    codeforces: { rating: 0, rank: 'N/A', solved: 0, lastSynced: new Date() },
-    codechef: { rating: 0, stars: '0*', solved: 0, lastSynced: new Date() },
-    hackerrank: { badges: 0, certificates: 0, solved: 0, lastSynced: new Date() }
+    leetcode: { easy: 0, medium: 0, hard: 0, totalSolved: 0, lastSynced: null },
+    github: { followers: 0, publicRepos: 0, totalStars: 0, lastSynced: null },
+    codeforces: { rating: 0, rank: 'N/A', solved: 0, lastSynced: null },
+    codechef: { rating: 0, stars: '0*', solved: 0, lastSynced: null },
+    hackerrank: { badges: 0, certificates: 0, solved: 0, lastSynced: null }
   };
 
   const platforms = [
     {
+      id: 'leetcode',
       name: 'LeetCode',
+      username: safePlatforms.leetcode?.username,
+      isConnected: !!safePlatforms.leetcode?.username,
       icon: Code2,
       color: 'text-amber-500',
       bg: 'bg-amber-50',
       border: 'border-amber-100',
       stats: [
-        { label: 'Rating', value: safePlatforms.leetcode?.rating || 0 },
-        { label: 'Solved', value: safePlatforms.leetcode?.totalSolved || 0 },
-        { label: 'Streak', value: `${safePlatforms.leetcode?.streak || 0} days` }
+        { label: 'Total', value: safePlatforms.leetcode?.totalSolved || 0 },
+        { label: 'Easy', value: safePlatforms.leetcode?.easy || 0 },
+        { label: 'Med', value: safePlatforms.leetcode?.medium || 0 },
+        { label: 'Hard', value: safePlatforms.leetcode?.hard || 0 }
       ],
       lastSynced: safePlatforms.leetcode?.lastSynced
     },
     {
+      id: 'github',
       name: 'GitHub',
+      username: safePlatforms.github?.username,
+      isConnected: !!safePlatforms.github?.username,
       icon: Github,
       color: 'text-slate-800',
       bg: 'bg-slate-100',
       border: 'border-slate-200',
       stats: [
-        { label: 'Commits', value: safePlatforms.github?.totalCommits || 0 },
-        { label: 'Repos', value: safePlatforms.github?.repos || 0 },
-        { label: 'Stars', value: safePlatforms.github?.stars || 0 }
+        { label: 'Followers', value: safePlatforms.github?.followers || 0 },
+        { label: 'Repos', value: safePlatforms.github?.publicRepos || 0 },
+        { label: 'Stars', value: safePlatforms.github?.totalStars || 0 }
       ],
       lastSynced: safePlatforms.github?.lastSynced
     },
     {
+      id: 'codeforces',
       name: 'Codeforces',
+      username: safePlatforms.codeforces?.username,
+      isConnected: !!safePlatforms.codeforces?.username,
       icon: Trophy,
       color: 'text-blue-600',
       bg: 'bg-blue-50',
@@ -89,7 +131,10 @@ export function StudentProfile() {
       lastSynced: safePlatforms.codeforces?.lastSynced
     },
     {
+      id: 'codechef',
       name: 'CodeChef',
+      username: safePlatforms.codechef?.username,
+      isConnected: !!safePlatforms.codechef?.username,
       icon: BookOpen,
       color: 'text-rose-600',
       bg: 'bg-rose-50',
@@ -102,7 +147,10 @@ export function StudentProfile() {
       lastSynced: safePlatforms.codechef?.lastSynced
     },
     {
+      id: 'hackerrank',
       name: 'HackerRank',
+      username: safePlatforms.hackerrank?.username,
+      isConnected: !!safePlatforms.hackerrank?.username,
       icon: Award,
       color: 'text-emerald-600',
       bg: 'bg-emerald-50',
@@ -138,32 +186,64 @@ export function StudentProfile() {
           {platforms.map((platform, idx) => (
             <div key={idx} className={`bg-white rounded-2xl border ${platform.border} shadow-sm overflow-hidden flex flex-col`}>
               <div className={`p-6 ${platform.bg} border-b ${platform.border} flex items-center justify-between`}>
-                <div className="flex items-center gap-3">
-                  <platform.icon className={`w-6 h-6 ${platform.color}`} />
-                  <h3 className={`font-bold ${platform.color}`}>{platform.name}</h3>
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-3">
+                    <platform.icon className={`w-6 h-6 ${platform.color}`} />
+                    <h3 className={`font-bold ${platform.color}`}>{platform.name}</h3>
+                  </div>
+                  {platform.isConnected && platform.username && (
+                    <span className="text-sm mt-1 ml-9 font-medium text-slate-500">@{platform.username}</span>
+                  )}
                 </div>
-                <span className="px-2.5 py-1 bg-white rounded-full text-xs font-medium text-slate-600 shadow-sm">Connected</span>
+                {platform.isConnected ? (
+                  <span className="px-2.5 py-1 bg-white rounded-full text-xs font-medium text-emerald-600 border border-emerald-100 shadow-sm">Connected</span>
+                ) : (
+                  <span className="px-2.5 py-1 bg-white rounded-full text-xs font-medium text-slate-400 border border-slate-100 shadow-sm">Not Connected</span>
+                )}
               </div>
-              <div className="p-6 flex-1 flex flex-col">
-                <div className="grid grid-cols-3 gap-4 mb-6">
-                  {platform.stats.map((stat, i) => (
-                    <div key={i} className="text-center">
-                      <div className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">{stat.label}</div>
-                      <div className="font-bold text-slate-900">{stat.value}</div>
-                    </div>
-                  ))}
+
+              {platform.isConnected ? (
+                <div className="p-6 flex-1 flex flex-col">
+                  <div className={`grid ${platform.stats.length === 4 ? 'grid-cols-4' : 'grid-cols-3'} gap-2 mb-6`}>
+                    {platform.stats.map((stat, i) => (
+                      <div key={i} className="text-center">
+                        <div className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">{stat.label}</div>
+                        <div className="font-bold text-slate-900">{stat.value}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                    <span>Last synced: {platform.lastSynced ? new Date(platform.lastSynced).toLocaleString() : 'Not synced'}</span>
+                    <button
+                      onClick={handleSync}
+                      disabled={syncLoading}
+                      className="font-medium text-indigo-600 hover:text-indigo-700 disabled:opacity-50"
+                    >
+                      {syncLoading ? '...' : 'Sync'}
+                    </button>
+                  </div>
                 </div>
-                <div className="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                  <span>Last synced: {new Date(platform.lastSynced).toLocaleString()}</span>
-                  <button
-                    onClick={handleSync}
-                    disabled={syncLoading}
-                    className="font-medium text-indigo-600 hover:text-indigo-700 disabled:opacity-50"
-                  >
-                    {syncLoading ? '...' : 'Sync'}
-                  </button>
+              ) : (
+                <div className="p-6 flex-1 flex flex-col justify-center">
+                  <div className="flex flex-col gap-3">
+                    <input
+                      type="text"
+                      placeholder={`Enter ${platform.name} username`}
+                      value={newPlatformInputs[platform.id] || ''}
+                      onChange={(e) => setNewPlatformInputs(prev => ({ ...prev, [platform.id]: e.target.value }))}
+                      onKeyDown={(e) => { if (e.key === 'Enter') handleConnect(platform.id) }}
+                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors"
+                    />
+                    <button
+                      onClick={() => handleConnect(platform.id)}
+                      disabled={connectingPlatform === platform.id || !newPlatformInputs[platform.id]}
+                      className="w-full py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                    >
+                      {connectingPlatform === platform.id ? 'Connecting...' : 'Connect'}
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           ))}
         </div>

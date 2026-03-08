@@ -12,7 +12,7 @@ const generateToken = (id) => {
 // REGISTER USER
 exports.registerUser = async (req, res, next) => {
     try {
-        const { name, email, password, college, batch } = req.body;
+        const { name, email, password, college, batch, gradYear, branch } = req.body;
 
         // check if user exists
         const userExists = await User.findOne({ email });
@@ -31,8 +31,10 @@ exports.registerUser = async (req, res, next) => {
             email,
             password: hashedPassword,
             role: "student",
-            college,
-            batch
+            college: college || "Default",
+            batch,
+            gradYear,
+            branch
         });
 
         res.status(201).json({
@@ -40,6 +42,8 @@ exports.registerUser = async (req, res, next) => {
             name: user.name,
             email: user.email,
             role: user.role,
+            gradYear: user.gradYear,
+            branch: user.branch,
             token: generateToken(user._id)
         });
 
@@ -69,6 +73,8 @@ exports.loginUser = async (req, res, next) => {
             name: user.name,
             email: user.email,
             role: user.role,
+            gradYear: user.gradYear,
+            branch: user.branch,
             token: generateToken(user._id)
         });
 

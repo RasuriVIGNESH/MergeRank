@@ -9,11 +9,16 @@ import {
 
 export function StudentDashboard() {
   const [student, setStudent] = useState(null);
+  const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    studentService.getStudentProfile().then(data => {
-      setStudent(data);
+    Promise.all([
+      studentService.getStudentProfile(),
+      studentService.getAnalytics()
+    ]).then(([profileData, analyticsData]) => {
+      setStudent(profileData);
+      setAnalytics(analyticsData);
       setLoading(false);
     }).catch(() => setLoading(false));
   }, []);
@@ -31,20 +36,31 @@ export function StudentDashboard() {
       codechef: { rating: 0 },
       hackerrank: { solved: 0 }
     },
-    topicStats: student.topicStats || [
-      { topic: 'Arrays', solved: 0 },
-      { topic: 'Strings', solved: 0 },
-      { topic: 'DP', solved: 0 },
-      { topic: 'Graphs', solved: 0 },
-      { topic: 'Trees', solved: 0 }
-    ],
     contestHistory: student.contestHistory || [],
     aiSuggestions: student.aiSuggestions || []
   };
 
+  const topicData = analytics?.leetcode ? [
+    { topic: 'Arrays', solved: analytics.leetcode.arrays || 0 },
+    { topic: 'Strings', solved: analytics.leetcode.strings || 0 },
+    { topic: 'DP', solved: analytics.leetcode.dp || 0 },
+    { topic: 'Graphs', solved: analytics.leetcode.graphs || 0 },
+    { topic: 'Trees', solved: analytics.leetcode.trees || 0 }
+  ] : safeStudent.topicStats || [
+    { topic: 'Arrays', solved: 0 },
+    { topic: 'Strings', solved: 0 },
+    { topic: 'DP', solved: 0 },
+    { topic: 'Graphs', solved: 0 },
+    { topic: 'Trees', solved: 0 }
+  ];
+
+  const githubContributions = analytics?.github?.totalContributions || safeStudent.platforms.github?.totalContributions || 0;
+
   const totalSolved = Object.values(safeStudent.platforms).reduce((acc, curr) =>
     acc + (curr?.solved || curr?.totalSolved || 0), 0
   );
+
+  const maxSolved = Math.max(...topicData.map(d => d.solved), 10);
 
   return (
     <Layout role="student">
@@ -67,7 +83,7 @@ export function StudentDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatCard title="Total Solved" value={totalSolved} icon={Code2} trend="+0 this week" color="text-emerald-600" bg="bg-emerald-50" />
           <StatCard title="LeetCode Rating" value={safeStudent.platforms.leetcode?.rating || 0} icon={TrendingUp} trend="Active" color="text-amber-600" bg="bg-amber-50" />
-          <StatCard title="GitHub Commits" value={safeStudent.platforms.github?.totalCommits || 0} icon={GitCommit} trend="Active" color="text-slate-700" bg="bg-slate-100" />
+          <StatCard title="GitHub Contributions" value={githubContributions} icon={GitCommit} trend="This year" color="text-slate-700" bg="bg-slate-100" />
           <StatCard title="Current Streak" value={`${safeStudent.platforms.leetcode?.streak || 0} days`} icon={Activity} trend="Keep it up!" color="text-rose-600" bg="bg-rose-50" />
         </div>
 
@@ -78,10 +94,10 @@ export function StudentDashboard() {
             <h3 className="text-lg font-semibold text-slate-800 mb-6">Topic Mastery</h3>
             <div className="h-72">
               <ResponsiveContainer width="100%" height="100%">
-                <RadarChart cx="50%" cy="50%" outerRadius="80%" data={safeStudent.topicStats}>
+                <RadarChart cx="50%" cy="50%" outerRadius="80%" data={topicData}>
                   <PolarGrid stroke="#e2e8f0" />
                   <PolarAngleAxis dataKey="topic" tick={{ fill: '#64748b', fontSize: 12 }} />
-                  <PolarRadiusAxis angle={30} domain={[0, 150]} tick={false} axisLine={false} />
+                  <PolarRadiusAxis angle={30} domain={[0, maxSolved]} tick={false} axisLine={false} />
                   <Radar name="Solved" dataKey="solved" stroke="#4f46e5" fill="#4f46e5" fillOpacity={0.2} />
                   <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
                 </RadarChart>

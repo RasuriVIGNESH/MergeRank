@@ -14,6 +14,7 @@ import { StudentProfile } from './pages/StudentProfile';
 import { MentorDashboard } from './pages/MentorDashboard';
 import { MentorBatches } from './pages/MentorBatches';
 import { MentorAlerts } from './pages/MentorAlerts';
+import StudentOnboarding from './pages/StudentOnboarding';
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
         {/* Auth */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/onboarding" element={<StudentOnboarding />} />
 
         {/* Student Routes */}
         <Route path="/student" element={<StudentDashboard />} />

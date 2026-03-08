@@ -8,6 +8,42 @@ const { getHackerrankStats } = require("../services/hackerrankService");
 
 
 // -----------------------------
+// VERIFY PLATFORM USERNAME
+// -----------------------------
+// POST /api/student/verify
+exports.verifyPlatformUsername = async (req, res) => {
+    try {
+        const { platform, username } = req.body;
+        if (!platform || !username) {
+            return res.status(400).json({ isValid: false, message: "Platform and username are required." });
+        }
+
+        let data = null;
+        if (platform === 'leetcode') {
+            data = await getLeetCodeStats(username);
+        } else if (platform === 'github') {
+            data = await getGithubStats(username);
+        } else if (platform === 'codeforces') {
+            data = await getCodeforcesStats(username);
+        } else if (platform === 'codechef') {
+            data = await getCodechefStats(username);
+        } else if (platform === 'hackerrank') {
+            data = await getHackerrankStats(username);
+        } else {
+            return res.status(400).json({ isValid: false, message: "Invalid platform." });
+        }
+
+        if (data) {
+            res.json({ isValid: true, message: "Username verified successfully!" });
+        } else {
+            res.json({ isValid: false, message: "User not found or invalid username." });
+        }
+    } catch (error) {
+        res.status(500).json({ isValid: false, message: error.message });
+    }
+};
+
+// -----------------------------
 // UPDATE PLATFORM USERNAMES
 // -----------------------------
 // PUT /api/student/platforms
@@ -232,7 +268,17 @@ exports.getAnalytics = async (req, res, next) => {
             totalSolved,
             platformActivity,
             activityScore,
-            consistencyScore
+            consistencyScore,
+            leetcode: {
+                arrays: lc.arrays || 0,
+                strings: lc.strings || 0,
+                dp: lc.dp || 0,
+                graphs: lc.graphs || 0,
+                trees: lc.trees || 0
+            },
+            github: {
+                totalContributions: gh.totalContributions || 0
+            }
         });
 
     } catch (error) {

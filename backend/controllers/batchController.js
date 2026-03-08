@@ -1,22 +1,4 @@
-const Batch = require("../models/Batch");
 const User = require("../models/User");
-
-// -----------------------------
-// CREATE BATCH
-// POST /api/batches
-// -----------------------------
-exports.createBatch = async (req, res, next) => {
-    try {
-        const { name, college, year, mentor } = req.body;
-
-        const batch = await Batch.create({ name, college, year, mentor });
-
-        res.status(201).json({ message: "Batch created successfully", batch });
-
-    } catch (error) {
-        next(error);
-    }
-};
 
 
 // -----------------------------
@@ -25,9 +7,34 @@ exports.createBatch = async (req, res, next) => {
 // -----------------------------
 exports.getBatches = async (req, res, next) => {
     try {
-        const batches = await Batch.find()
-            .populate("mentor", "name email")
-            .populate("students", "name email batch");
+
+        const batches = await User.aggregate([
+            {
+                $match: { role: "student" }
+            },
+            {
+                $group: {
+                    _id: {
+                        college: "$college",
+                        branch: "$branch",
+                        gradYear: "$gradYear"
+                    },
+                    studentCount: { $sum: 1 }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    college: "$_id.college",
+                    branch: "$_id.branch",
+                    gradYear: "$_id.gradYear",
+                    studentCount: 1
+                }
+            },
+            {
+                $sort: { gradYear: 1 }
+            }
+        ]);
 
         res.json(batches);
 
@@ -37,79 +44,30 @@ exports.getBatches = async (req, res, next) => {
 };
 
 
+
 // -----------------------------
-// GET BATCH BY ID
-// GET /api/batches/:id
+// GET STUDENTS IN A BATCH
+// GET /api/batches/:branch/:year
 // -----------------------------
-exports.getBatchById = async (req, res, next) => {
+exports.getBatchStudents = async (req, res, next) => {
     try {
-        const batch = await Batch.findById(req.params.id)
-            .populate("mentor", "name email role")
-            .populate("students", "name email batch platforms.leetcode.totalSolved platforms.codeforces.rating");
 
-        if (!batch) {
-            return res.status(404).json({ message: "Batch not found" });
-        }
+        const { branch, year } = req.params;
 
-        res.json(batch);
+        const students = await User.find({
+            role: "student",
+            branch,
+            gradYear: parseInt(year)
+        }).select(
+            "name email branch gradYear platforms.leetcode.totalSolved platforms.codeforces.rating activityScore consistencyScore"
+        );
 
-    } catch (error) {
-        next(error);
-    }
-};
-
-
-// -----------------------------
-// ADD STUDENT TO BATCH
-// POST /api/batches/add-student
-// -----------------------------
-exports.addStudent = async (req, res, next) => {
-    try {
-        const { batchId, userId } = req.body;
-
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
-
-        // $addToSet prevents duplicates automatically
-        const batch = await Batch.findByIdAndUpdate(
-            batchId,
-            { $addToSet: { students: userId } },
-            { new: true }
-        ).populate("students", "name email batch");
-
-        if (!batch) {
-            return res.status(404).json({ message: "Batch not found" });
-        }
-
-        res.json({ message: "Student added to batch", batch });
-
-    } catch (error) {
-        next(error);
-    }
-};
-
-
-// -----------------------------
-// REMOVE STUDENT FROM BATCH
-// DELETE /api/batches/remove-student
-// -----------------------------
-exports.removeStudent = async (req, res, next) => {
-    try {
-        const { batchId, userId } = req.body;
-
-        const batch = await Batch.findByIdAndUpdate(
-            batchId,
-            { $pull: { students: userId } },
-            { new: true }
-        ).populate("students", "name email batch");
-
-        if (!batch) {
-            return res.status(404).json({ message: "Batch not found" });
-        }
-
-        res.json({ message: "Student removed from batch", batch });
+        res.json({
+            branch,
+            year,
+            count: students.length,
+            students
+        });
 
     } catch (error) {
         next(error);

@@ -1,5 +1,4 @@
 const User = require("../models/User");
-const Batch = require("../models/Batch");
 
 // -----------------------------
 // GET MENTOR DASHBOARD DATA

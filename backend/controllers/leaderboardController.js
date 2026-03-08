@@ -98,18 +98,18 @@ exports.getGithubLeaderboard = async (req, res) => {
     try {
 
         const users = await User.find({
-            "platforms.github.publicRepos": { $exists: true }
+            "platforms.github.totalContributions": { $exists: true }
         })
-            .sort({ "platforms.github.publicRepos": -1 })
+            .sort({ "platforms.github.totalContributions": -1 })
             .select("name batch platforms.github");
 
         const leaderboard = users.map((user, index) => ({
             rank: index + 1,
             name: user.name,
             batch: user.batch,
-            publicRepos: user.platforms.github.publicRepos,
-            followers: user.platforms.github.followers,
-            totalStars: user.platforms.github.totalStars
+            totalContributions: user.platforms.github.totalContributions || 0,
+            followers: user.platforms.github.followers || 0,
+            totalStars: user.platforms.github.totalStars || 0
         }));
 
         res.json(leaderboard);

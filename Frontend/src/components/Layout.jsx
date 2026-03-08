@@ -89,7 +89,7 @@ export function Layout({ children, role }) {
           </h1>
           <div className="flex items-center gap-4">
             <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm">
-              {role === 'student' ? 'AJ' : 'AT'}
+              {role === 'student' ? 'STUDENT' : 'MENTOR'}
             </div>
           </div>
         </header>

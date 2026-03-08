@@ -23,6 +23,16 @@ const platformSchema = new mongoose.Schema({
 
     badges: Number,
 
+    // Topic Mastery (LeetCode)
+    arrays: Number,
+    strings: Number,
+    dp: Number,
+    graphs: Number,
+    trees: Number,
+
+    // Contributions (GitHub)
+    totalContributions: Number,
+
     lastSynced: Date
 }, { _id: false });
 
@@ -52,6 +62,8 @@ const userSchema = new mongoose.Schema(
 
         college: String,
         batch: String,
+        gradYear: Number,
+        branch: String,
 
         platforms: {
             leetcode: platformSchema,

@@ -6,14 +6,15 @@ import { Trophy, Medal, Star, TrendingUp } from 'lucide-react';
 export function Leaderboard() {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [platform, setPlatform] = useState('leetcode');
 
   useEffect(() => {
-    // We can fetch default leaderboard (leetcode) 
-    studentService.getBatchLeaderboard('leetcode').then(data => {
+    setLoading(true);
+    studentService.getBatchLeaderboard(platform).then(data => {
       setStudents(data);
       setLoading(false);
     }).catch(() => setLoading(false));
-  }, []);
+  }, [platform]);
 
   if (loading) return <Layout role="student"><div className="flex items-center justify-center h-full"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div></div></Layout>;
 
@@ -26,10 +27,15 @@ export function Leaderboard() {
             <p className="text-slate-500 mt-1">Compare your progress with your peers in 2025-CS-A.</p>
           </div>
           <div className="flex items-center gap-3">
-            <select className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-              <option>Placement Readiness</option>
-              <option>Total Solved</option>
-              <option>LeetCode Rating</option>
+            <select
+              value={platform}
+              onChange={(e) => setPlatform(e.target.value)}
+              className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="leetcode">LeetCode Solved</option>
+              <option value="codeforces">Codeforces Rating</option>
+              <option value="codechef">CodeChef Rating</option>
+              <option value="github">GitHub Contributions</option>
             </select>
           </div>
         </div>
@@ -50,7 +56,7 @@ export function Leaderboard() {
                   <th className="px-6 py-4 text-center">Readiness Score</th>
                   <th className="px-6 py-4 text-center">Total Solved</th>
                   <th className="px-6 py-4 text-center">LeetCode Rating</th>
-                  <th className="px-6 py-4 text-center">GitHub Commits</th>
+                  <th className="px-6 py-4 text-center">Contributions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200">
@@ -84,12 +90,12 @@ export function Leaderboard() {
                       </td>
                       <td className="px-6 py-4 text-center">
                         <div className="inline-flex items-center justify-center px-3 py-1 rounded-full bg-slate-100 font-bold text-slate-700">
-                          {student.placementReadiness}
+                          {student.placementReadiness || 0}
                         </div>
                       </td>
                       <td className="px-6 py-4 text-center font-mono text-slate-600">{totalSolved}</td>
-                      <td className="px-6 py-4 text-center font-mono text-slate-600">{student.platforms.leetcode.rating}</td>
-                      <td className="px-6 py-4 text-center font-mono text-slate-600">{student.platforms.github.totalCommits}</td>
+                      <td className="px-6 py-4 text-center font-mono text-slate-600">{student.platforms?.leetcode?.rating || student.platforms?.leetcode?.totalSolved || 0}</td>
+                      <td className="px-6 py-4 text-center font-mono text-slate-600">{student.totalContributions || student.platforms?.github?.totalContributions || 0}</td>
                     </tr>
                   );
                 })}

@@ -8,8 +8,12 @@ const {
     syncPlatformData,
     getStudentStats,
     getAnalytics,
-    getSuggestions
+    getSuggestions,
+    verifyPlatformUsername
 } = require("../controllers/studentController");
+
+// verify platform username
+router.post("/verify", protect, verifyPlatformUsername);
 
 // update usernames
 router.put("/platforms", protect, updatePlatforms);
