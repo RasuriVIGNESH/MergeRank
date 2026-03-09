@@ -13,16 +13,15 @@ exports.getLeetcodeLeaderboard = async (req, res, next) => {
             "platforms.leetcode.totalSolved": { $exists: true }
         };
 
-        if (branch && year) {
-            filter.branch = branch;
-            filter.gradYear = parseInt(year);
-        }
+        if (branch) filter.branch = branch;
+        if (year) filter.gradYear = parseInt(year);
 
         const users = await User.find(filter)
             .sort({ "platforms.leetcode.totalSolved": -1 })
             .select("name branch gradYear platforms.leetcode");
 
         const leaderboard = users.map((user, index) => ({
+            _id: user._id,
             rank: index + 1,
             name: user.name,
             branch: user.branch,
@@ -53,16 +52,15 @@ exports.getCodeforcesLeaderboard = async (req, res, next) => {
             "platforms.codeforces.rating": { $exists: true }
         };
 
-        if (branch && year) {
-            filter.branch = branch;
-            filter.gradYear = parseInt(year);
-        }
+        if (branch) filter.branch = branch;
+        if (year) filter.gradYear = parseInt(year);
 
         const users = await User.find(filter)
             .sort({ "platforms.codeforces.rating": -1 })
             .select("name branch gradYear platforms.codeforces");
 
         const leaderboard = users.map((user, index) => ({
+            _id: user._id,
             rank: index + 1,
             name: user.name,
             branch: user.branch,
@@ -91,16 +89,15 @@ exports.getCodechefLeaderboard = async (req, res, next) => {
             "platforms.codechef.rating": { $exists: true }
         };
 
-        if (branch && year) {
-            filter.branch = branch;
-            filter.gradYear = parseInt(year);
-        }
+        if (branch) filter.branch = branch;
+        if (year) filter.gradYear = parseInt(year);
 
         const users = await User.find(filter)
             .sort({ "platforms.codechef.rating": -1 })
             .select("name branch gradYear platforms.codechef");
 
         const leaderboard = users.map((user, index) => ({
+            _id: user._id,
             rank: index + 1,
             name: user.name,
             branch: user.branch,
@@ -129,16 +126,15 @@ exports.getGithubLeaderboard = async (req, res, next) => {
             "platforms.github.totalContributions": { $exists: true }
         };
 
-        if (branch && year) {
-            filter.branch = branch;
-            filter.gradYear = parseInt(year);
-        }
+        if (branch) filter.branch = branch;
+        if (year) filter.gradYear = parseInt(year);
 
         const users = await User.find(filter)
             .sort({ "platforms.github.totalContributions": -1 })
             .select("name branch gradYear platforms.github");
 
         const leaderboard = users.map((user, index) => ({
+            _id: user._id,
             rank: index + 1,
             name: user.name,
             branch: user.branch,
@@ -167,10 +163,8 @@ exports.getOverallLeaderboard = async (req, res, next) => {
 
         let filter = { role: "student" };
 
-        if (branch && year) {
-            filter.branch = branch;
-            filter.gradYear = parseInt(year);
-        }
+        if (branch) filter.branch = branch;
+        if (year) filter.gradYear = parseInt(year);
 
         const users = await User.find(filter).select(
             "name branch gradYear platforms"
@@ -215,6 +209,7 @@ exports.getOverallLeaderboard = async (req, res, next) => {
                 normalizedCC * 0.1;
 
             return {
+                _id: user._id,
                 name: user.name,
                 branch: user.branch,
                 gradYear: user.gradYear,

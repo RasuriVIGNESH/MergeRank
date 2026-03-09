@@ -82,7 +82,7 @@ export function StudentDashboard() {
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatCard title="Total Solved" value={totalSolved} icon={Code2} trend="+0 this week" color="text-emerald-600" bg="bg-emerald-50" />
-          <StatCard title="LeetCode Rating" value={safeStudent.platforms.leetcode?.rating || 0} icon={TrendingUp} trend="Active" color="text-amber-600" bg="bg-amber-50" />
+          {/* <StatCard title="LeetCode Rating" value={safeStudent.platforms.leetcode?.rating || 0} icon={TrendingUp} trend="Active" color="text-amber-600" bg="bg-amber-50" /> */}
           <StatCard title="GitHub Contributions" value={githubContributions} icon={GitCommit} trend="This year" color="text-slate-700" bg="bg-slate-100" />
           <StatCard title="Current Streak" value={`${safeStudent.platforms.leetcode?.streak || 0} days`} icon={Activity} trend="Keep it up!" color="text-rose-600" bg="bg-rose-50" />
         </div>

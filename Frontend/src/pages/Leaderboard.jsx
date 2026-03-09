@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Layout } from '../components/Layout';
 import { leaderboardService, batchService } from '../services/api';
 import { Trophy, Medal, Star, Github, Code2, Trophy as CFLogo, Filter, Search } from 'lucide-react';
@@ -12,10 +13,12 @@ const PLATFORMS = [
 ];
 
 export function Leaderboard() {
+  const navigate = useNavigate();
   const [platform, setPlatform] = useState('overall');
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [batches, setBatches] = useState([]);
+  const userRole = localStorage.getItem('role') || 'student';
 
   const [filterBranch, setFilterBranch] = useState('');
   const [filterYear, setFilterYear] = useState('');
@@ -51,7 +54,7 @@ export function Leaderboard() {
   };
 
   const getPlatMetric = (student) => {
-    if (platform === 'overall') return <span className="font-bold text-indigo-600">{student.mergeRankScore}</span>;
+    if (platform === 'overall') return <span className="font-bold text-indigo-600">{student.github}</span>;
     if (platform === 'leetcode') return <span className="font-bold text-amber-600">{student.solved}</span>;
     if (platform === 'codeforces') return <span className="font-bold text-blue-600">{student.rating}</span>;
     if (platform === 'codechef') return <span className="font-bold text-rose-600">{student.rating}</span>;
@@ -60,7 +63,7 @@ export function Leaderboard() {
   };
 
   const getHeaderMetric = () => {
-    if (platform === 'overall') return 'MergeRank Score';
+    if (platform === 'overall') return 'GitHub Contributions';
     if (platform === 'leetcode') return 'Total Solved';
     if (platform === 'codeforces' || platform === 'codechef') return 'Rating';
     if (platform === 'github') return 'Contributions';
@@ -125,8 +128,8 @@ export function Leaderboard() {
                 key={plat.id}
                 onClick={() => setPlatform(plat.id)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${isActive
-                    ? `bg-white shadow-sm ${plat.color}`
-                    : 'text-slate-500 hover:text-slate-700'
+                  ? `bg-white shadow-sm ${plat.color}`
+                  : 'text-slate-500 hover:text-slate-700'
                   }`}
               >
                 <Icon className="w-4 h-4" />
@@ -165,7 +168,9 @@ export function Leaderboard() {
                         <th className="px-6 py-4 text-center">Hard</th>
                       </>
                     )}
-                    <th className="px-6 py-4 text-right pr-10">Actions</th>
+                    {userRole === 'mentor' && (
+                      <th className="px-6 py-4 text-right pr-10">Actions</th>
+                    )}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
@@ -208,11 +213,16 @@ export function Leaderboard() {
                         </>
                       )}
 
-                      <td className="px-6 py-4 text-right pr-6">
-                        <button className="text-indigo-600 hover:text-indigo-700 font-bold text-xs uppercase tracking-wider">
-                          Profile
-                        </button>
-                      </td>
+                      {userRole === 'mentor' && (
+                        <td className="px-6 py-4 text-right pr-6">
+                          <button
+                            onClick={() => navigate(`/student/profile/${student._id}`)}
+                            className="text-indigo-600 hover:text-indigo-700 font-bold text-xs uppercase tracking-wider"
+                          >
+                            Profile
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   ))}
                   {filteredStudents.length === 0 && (

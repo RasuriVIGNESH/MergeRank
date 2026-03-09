@@ -105,8 +105,8 @@ const PLATFORMS = [
     { name: 'LeetCode', logo: 'https://cdn.simpleicons.org/leetcode/FFA116' },
     { name: 'GitHub', logo: 'https://cdn.simpleicons.org/github/ffffff' },
     { name: 'Codeforces', logo: 'https://cdn.simpleicons.org/codeforces/1F8ACB' },
-    { name: 'CodeChef', logo: 'https://cdn.simpleicons.org/codechef/ffffff' }
-    // { name: 'HackerRank', logo: 'https://cdn.simpleicons.org/hackerrank/2EC866' },
+    { name: 'CodeChef', logo: 'https://cdn.simpleicons.org/codechef/ffffff' },
+    { name: 'HackerRank', logo: 'https://cdn.simpleicons.org/hackerrank/2EC866' },
 ];
 
 const PERKS = [
@@ -210,11 +210,9 @@ const Register = () => {
                 {/* Brand + copy */}
                 <div style={{ padding: '44px 48px 0', position: 'relative', zIndex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 44 }}>
-                        <img
-                            src="/logo.png"
-                            alt="MergeRank"
-                            style={{ width: 34, height: 34, objectFit: "contain" }}
-                        />
+                        <div style={{ width: 34, height: 34, borderRadius: 9, background: 'linear-gradient(135deg,#2563eb,#6366f1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <GitMerge style={{ width: 16, height: 16, color: '#fff' }} />
+                        </div>
                         <span style={{ fontSize: 17, fontWeight: 700, color: '#f0f4ff', letterSpacing: '-0.02em' }}>MergeRank</span>
                     </div>
 
@@ -250,12 +248,8 @@ const Register = () => {
                         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 216, height: 216, borderRadius: '50%', border: '1px dashed rgba(99,102,241,0.25)' }} />
 
                         {/* Centre MR hub */}
-                        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }}>
-                            <img
-                                src="/logo.png"
-                                alt="MergeRank"
-                                style={{ width: 60, height: 60, objectFit: "contain" }}
-                            />
+                        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 60, height: 60, borderRadius: 16, background: 'linear-gradient(135deg,#2563eb,#6366f1)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 40px rgba(99,102,241,0.45)', zIndex: 3 }}>
+                            <span style={{ fontSize: 15, fontWeight: 800, color: '#fff' }}>MR</span>
                         </div>
 
                         {/* Orbiting nodes */}
@@ -286,11 +280,9 @@ const Register = () => {
                 <div style={{ flexShrink: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 32px', borderBottom: `1px solid ${D ? 'rgba(255,255,255,0.06)' : '#f0f0f0'}` }}>
                     {/* Mobile logo */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }} className="lg:hidden">
-                        <img
-                            src="/logo.png"
-                            alt="MergeRank"
-                            style={{ width: 34, height: 34, objectFit: "contain" }}
-                        />
+                        <div style={{ width: 26, height: 26, borderRadius: 7, background: 'linear-gradient(135deg,#2563eb,#6366f1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <GitMerge style={{ width: 13, height: 13, color: '#fff' }} />
+                        </div>
                         <span style={{ fontSize: 14, fontWeight: 700, color: textMain }}>MergeRank</span>
                     </div>
 
