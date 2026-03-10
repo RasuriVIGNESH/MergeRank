@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Layout } from '../components/Layout';
 import { mentorService } from '../services/api';
-import { AlertTriangle, Clock, MessageSquare, CheckCircle2 } from 'lucide-react';
+import { AlertTriangle, Clock, MessageSquare, CheckCircle2, ChevronRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { getStatusText, getStatusTextColor } from '../utils/statusHelper';
 
 export function MentorAlerts() {
   const [data, setData] = useState(null);
@@ -18,12 +20,13 @@ export function MentorAlerts() {
 
   const inactiveStudents = data.students.filter((s) => {
     const lastActive = new Date(s.lastActive);
-    const now = new Date('2026-03-04T08:00:00Z'); // Mock current time
+    const now = new Date(); // Use actual current time
     const diffTime = Math.abs(now.getTime() - lastActive.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays > 7;
   });
 
+  // Students with status "At Risk" (< 40) or "Needs Improvement" (< 60)
   const strugglingStudents = data.students.filter((s) => s.placementReadiness < 60);
 
   return (
@@ -68,7 +71,7 @@ export function MentorAlerts() {
                   </div>
                 </div>
               )) : (
-                <div className="p-8 text-center text-slate-500">No inactive students. Great job!</div>
+                <div className="p-8 text-center text-slate-500 text-sm">No inactive students. Great job!</div>
               )}
             </div>
           </div>
@@ -91,17 +94,29 @@ export function MentorAlerts() {
                     </div>
                     <div>
                       <h4 className="font-medium text-slate-900">{student.name}</h4>
-                      <p className="text-sm text-rose-600 font-medium">Score: {student.placementReadiness}</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className={`text-sm font-bold ${getStatusTextColor(student.placementReadiness)}`}>
+                          {student.placementReadiness}%
+                        </span>
+                        <span className="text-xs text-slate-400">•</span>
+                        <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+                          {getStatusText(student.placementReadiness)}
+                        </span>
+                      </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <button className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors border border-indigo-100" title="View Profile">
-                      View
-                    </button>
+                    <Link
+                      to={`/student/${student.id}`}
+                      className="px-3 py-1.5 text-xs font-medium text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors border border-indigo-100 flex items-center gap-1"
+                    >
+                      View Profile
+                      <ChevronRight className="w-3 h-3" />
+                    </Link>
                   </div>
                 </div>
               )) : (
-                <div className="p-8 text-center text-slate-500">No struggling students. Excellent!</div>
+                <div className="p-8 text-center text-slate-500 text-sm">No struggling students. Excellent!</div>
               )}
             </div>
           </div>
