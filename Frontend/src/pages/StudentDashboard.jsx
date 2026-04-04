@@ -10,15 +10,18 @@ import {
 export function StudentDashboard() {
   const [student, setStudent] = useState(null);
   const [analytics, setAnalytics] = useState(null);
+  const [calendar, setCalendar] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([
       studentService.getStudentProfile(),
-      studentService.getAnalytics()
-    ]).then(([profileData, analyticsData]) => {
+      studentService.getAnalytics(),
+      studentService.getGithubCalendar().catch(() => null) // Ignore errors if no calendar
+    ]).then(([profileData, analyticsData, calendarData]) => {
       setStudent(profileData);
       setAnalytics(analyticsData);
+      setCalendar(calendarData?.calendar || null);
       setLoading(false);
     }).catch(() => setLoading(false));
   }, []);
@@ -105,29 +108,42 @@ export function StudentDashboard() {
             </div>
           </div>
 
-          {/* Contest History */}
+          {/* GitHub Contribution Heatmap */}
           <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-            <h3 className="text-lg font-semibold text-slate-800 mb-6">Contest Rating History</h3>
-            <div className="h-72">
-              <ResponsiveContainer width="100%" height="100%">
-                {safeStudent.contestHistory.length > 0 ? (
-                  <BarChart data={safeStudent.contestHistory}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                    <XAxis dataKey="date" tickFormatter={(val) => new Date(val).toLocaleDateString('en-US', { month: 'short' })} tick={{ fill: '#64748b', fontSize: 12 }} axisLine={false} tickLine={false} dy={10} />
-                    <YAxis domain={['dataMin - 100', 'dataMax + 100']} tick={{ fill: '#64748b', fontSize: 12 }} axisLine={false} tickLine={false} dx={-10} />
-                    <Tooltip
-                      cursor={{ fill: '#f8fafc' }}
-                      contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                    />
-                    <Bar dataKey="rating" fill="#4f46e5" radius={[4, 4, 0, 0]} maxBarSize={40} />
-                  </BarChart>
+            <h3 className="text-lg font-semibold text-slate-800 mb-6">GitHub Contribution Heatmap</h3>
+            <div className="h-72 flex items-center justify-center">
+              {safeStudent.platforms.github?.username ? (
+                calendar ? (
+                  <div className="flex flex-row gap-1 overflow-x-auto">
+                    {calendar.weeks.slice(-8).map((week, weekIndex) => (
+                      <div key={weekIndex} className="flex flex-col gap-1">
+                        {week.contributionDays.map((day, dayIndex) => {
+                          const intensity = Math.min(day.contributionCount, 4);
+                          const colors = ['#ebedf0', '#9be9a8', '#40c463', '#30a14e', '#216e39'];
+                          return (
+                            <div
+                              key={dayIndex}
+                              className="w-3 h-3 rounded-sm"
+                              style={{ backgroundColor: colors[intensity] }}
+                              title={`${day.date}: ${day.contributionCount} contributions`}
+                            />
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center h-full text-slate-400">
-                    <Trophy className="w-12 h-12 mb-2 opacity-20" />
-                    <p>No contest history found.</p>
+                    <GitCommit className="w-12 h-12 mb-2 opacity-20" />
+                    <p>Loading heatmap...</p>
                   </div>
-                )}
-              </ResponsiveContainer>
+                )
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full text-slate-400">
+                  <GitCommit className="w-12 h-12 mb-2 opacity-20" />
+                  <p>No GitHub username found.</p>
+                </div>
+              )}
             </div>
           </div>
         </div>

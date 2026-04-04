@@ -107,9 +107,9 @@ export function MentorDashboard() {
                   <th className="px-6 py-4">Batch</th>
                   <th className="px-6 py-4">Total Solved</th>
                   <th className="px-6 py-4">LeetCode Rating</th>
-                  <th className="px-6 py-4">Readiness</th>
+                  {/* <th className="px-6 py-4">Readiness</th>
                   <th className="px-6 py-4">Status</th>
-                  <th className="px-6 py-4 text-right">Actions</th>
+                  <th className="px-6 py-4 text-right">Actions</th> */}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200">
@@ -133,7 +133,7 @@ export function MentorDashboard() {
                       <td className="px-6 py-4 text-slate-600">{student.batch}</td>
                       <td className="px-6 py-4 font-mono text-slate-700">{totalSolved}</td>
                       <td className="px-6 py-4 font-mono text-slate-700">{student.platforms.leetcode.rating}</td>
-                      <td className="px-6 py-4">
+                      {/* <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
                           <div className="w-16 h-2 bg-slate-100 rounded-full overflow-hidden">
                             <div
@@ -143,8 +143,8 @@ export function MentorDashboard() {
                           </div>
                           <span className="font-medium text-slate-700">{readiness}</span>
                         </div>
-                      </td>
-                      <td className="px-6 py-4">
+                      </td> */}
+                      {/* <td className="px-6 py-4">
                         <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${getStatusColor(readiness)}`}>
                           {getStatusText(readiness)}
                         </span>
@@ -153,7 +153,7 @@ export function MentorDashboard() {
                         <Link to={`/student/${student.id}`} className="p-1.5 text-slate-400 hover:text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors">
                           <ChevronRight className="w-4 h-4" />
                         </Link>
-                      </td>
+                      </td> */}
                     </tr>
                   );
                 })}

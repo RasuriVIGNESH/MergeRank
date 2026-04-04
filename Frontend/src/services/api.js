@@ -65,6 +65,11 @@ export const studentService = {
     return response.data;
   },
 
+  async getGithubCalendar() {
+    const response = await api.get('/student/github-calendar');
+    return response.data;
+  },
+
   async syncData() {
     const response = await api.post('/student/sync');
     return response.data;

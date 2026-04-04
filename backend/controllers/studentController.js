@@ -1,7 +1,7 @@
 const User = require("../models/User");
 
 const { getLeetCodeStats } = require("../services/leetcodeService");
-const { getGithubStats } = require("../services/githubService");
+const { getGithubStats, getGithubContributionCalendar } = require("../services/githubService");
 const { getCodeforcesStats } = require("../services/codeforcesService");
 const { getCodechefStats } = require("../services/codechefService");
 const { getHackerrankStats } = require("../services/hackerrankService");
@@ -389,6 +389,32 @@ exports.getSuggestions = async (req, res, next) => {
         await user.save();
 
         res.json({ suggestions: user.aiSuggestions });
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+// -----------------------------
+// GET GITHUB CONTRIBUTION CALENDAR
+// -----------------------------
+// GET /api/student/github-calendar
+exports.getGithubCalendar = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const user = await User.findById(userId).select("platforms.github");
+
+        if (!user || !user.platforms.github.username) {
+            return res.status(400).json({ message: "GitHub username not found." });
+        }
+
+        const calendar = await getGithubContributionCalendar(user.platforms.github.username);
+
+        if (!calendar) {
+            return res.status(404).json({ message: "Unable to fetch GitHub contribution calendar." });
+        }
+
+        res.json({ calendar });
 
     } catch (error) {
         next(error);

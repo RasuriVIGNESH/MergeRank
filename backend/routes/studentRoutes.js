@@ -9,7 +9,8 @@ const {
     getStudentStats,
     getAnalytics,
     getSuggestions,
-    verifyPlatformUsername
+    verifyPlatformUsername,
+    getGithubCalendar
 } = require("../controllers/studentController");
 
 // verify platform username
@@ -32,5 +33,8 @@ router.get("/analytics", protect, getAnalytics);
 
 // suggestions
 router.get("/suggestions", protect, getSuggestions);
+
+// github calendar
+router.get("/github-calendar", protect, getGithubCalendar);
 
 module.exports = router;

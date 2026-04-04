@@ -33,6 +33,7 @@ const getGithubStats = async (username) => {
         });
 
         let totalContributions = 0;
+        let contributionCalendar = null;
 
         try {
 
@@ -47,6 +48,12 @@ const getGithubStats = async (username) => {
                 ) {
                   contributionCalendar {
                     totalContributions
+                    weeks {
+                      contributionDays {
+                        date
+                        contributionCount
+                      }
+                    }
                   }
                 }
               }
@@ -59,9 +66,9 @@ const getGithubStats = async (username) => {
                 { headers }
             );
 
-            totalContributions =
-                graphRes.data?.data?.user?.contributionsCollection
-                    ?.contributionCalendar?.totalContributions || 0;
+            const calendar = graphRes.data?.data?.user?.contributionsCollection?.contributionCalendar;
+            totalContributions = calendar?.totalContributions || 0;
+            contributionCalendar = calendar;
 
         } catch (gqlError) {
             console.error("GitHub GraphQL API error:", gqlError.message);
@@ -74,7 +81,8 @@ const getGithubStats = async (username) => {
             following: userRes.data.following,
             totalStars,
             languages,
-            totalContributions
+            totalContributions,
+            contributionCalendar
         };
 
     } catch (error) {
@@ -83,4 +91,48 @@ const getGithubStats = async (username) => {
     }
 };
 
-module.exports = { getGithubStats };
+const getGithubContributionCalendar = async (username) => {
+    try {
+        const headers = {
+            Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+            "User-Agent": "MergeRank-App"
+        };
+
+        const year = new Date().getFullYear();
+
+        const query = `
+        query getContributionCalendar($username: String!) {
+          user(login: $username) {
+            contributionsCollection(
+              from: "${year}-01-01T00:00:00Z"
+              to: "${year}-12-31T23:59:59Z"
+            ) {
+              contributionCalendar {
+                totalContributions
+                weeks {
+                  contributionDays {
+                    date
+                    contributionCount
+                  }
+                }
+              }
+            }
+          }
+        }
+        `;
+
+        const graphRes = await axios.post(
+            "https://api.github.com/graphql",
+            { query, variables: { username } },
+            { headers }
+        );
+
+        return graphRes.data?.data?.user?.contributionsCollection?.contributionCalendar || null;
+
+    } catch (error) {
+        console.error("GitHub Contribution Calendar API error:", error.message);
+        return null;
+    }
+};
+
+module.exports = { getGithubStats, getGithubContributionCalendar };
