@@ -34,6 +34,12 @@ app.get("/", (req, res) => {
     res.send("MergeRank Backend Running 🚀");
 });
 
+// app.get("/health", (req, res) => {
+//     res.send("server is running");
+// });
+app.get("/healthz", (req, res) => {
+    res.status(200).json({ status: "ok" });
+});
 // Centralized error handler (must be last middleware)
 app.use(errorHandler);
 
