@@ -257,7 +257,7 @@ const LandingPage = () => {
                             Log in
                         </button>
                         <button
-                            onClick={() => navigate('/login')}
+                            onClick={() => navigate('/register')}
                             className="shimmer-btn text-white text-sm font-semibold px-5 py-2 rounded-lg"
                             style={{ border: 'none', cursor: 'pointer' }}
                         >
