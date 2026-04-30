@@ -213,14 +213,68 @@ const heatColor = (v, dark) => {
 const LandingPage = () => {
     const [dark, setDark] = useState(false);
     const [activeTab, setActiveTab] = useState('students');
+    const [backendReady, setBackendReady] = useState(null); // null = checking, true = ready, false = waking up
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+        let cancelled = false;
+
+        const checkHealth = async () => {
+            try {
+                const res = await fetch(`${API_URL}/healthz`);
+                if (!cancelled) setBackendReady(res.ok);
+            } catch {
+                if (!cancelled) setBackendReady(false);
+            }
+        };
+
+        checkHealth();
+
+        // Poll every 15s while backend isn't ready
+        const interval = setInterval(async () => {
+            if (backendReady) { clearInterval(interval); return; }
+            try {
+                const res = await fetch(`${API_URL}/healthz`);
+                if (!cancelled && res.ok) {
+                    setBackendReady(true);
+                    clearInterval(interval);
+                }
+            } catch { /* still waking */ }
+        }, 15000);
+
+        return () => { cancelled = true; clearInterval(interval); };
+    }, []);
 
     return (
         <div className={`mr-root min-h-screen ${dark ? 'dark-root' : ''}`} style={{ background: dark ? '#080c14' : '#ffffff', color: dark ? '#f0f4ff' : '#0f172a' }}>
             <Styles />
 
+            {/* ── BACKEND WAKE-UP BANNER ───────────────────────────────────── */}
+            {backendReady === false && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, zIndex: 9999,
+                    background: 'linear-gradient(90deg, #1e3a5f 0%, #1d4ed8 50%, #1e3a5f 100%)',
+                    backgroundSize: '200% auto',
+                    animation: 'shimmer 4s linear infinite',
+                    padding: '10px 24px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                    boxShadow: '0 2px 12px rgba(29,78,216,0.35)',
+                }}>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0, animation: 'spin 1s linear infinite' }}>
+                        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+                        <circle cx="8" cy="8" r="6" stroke="rgba(255,255,255,0.3)" strokeWidth="2" />
+                        <path d="M8 2a6 6 0 0 1 6 6" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" />
+                    </svg>
+                    <span style={{ color: '#ffffff', fontSize: 13.5, fontWeight: 500, letterSpacing: '0.01em' }}>
+                        Waking up the server — this takes about 2 minutes on first load.&nbsp;
+                        <span style={{ opacity: 0.8, fontWeight: 400 }}>Everything below is ready to explore while you wait.</span>
+                    </span>
+                </div>
+            )}
+
             {/* ── NAVBAR ──────────────────────────────────────────────────── */}
-            <nav className="nav-bar fixed top-0 left-0 right-0 z-50 backdrop-blur-xl border-b" style={{ height: 64 }}>
+            <nav className="nav-bar fixed left-0 right-0 z-50 backdrop-blur-xl border-b" style={{ height: 64, top: backendReady === false ? 41 : 0, transition: 'top 0.3s ease' }}>
                 <div className="max-w-7xl mx-auto px-6 h-full flex items-center justify-between">
 
                     {/* Brand */}

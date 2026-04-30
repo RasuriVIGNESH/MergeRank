@@ -37,7 +37,7 @@ app.get("/", (req, res) => {
 // app.get("/health", (req, res) => {
 //     res.send("server is running");
 // });
-app.get("/healthz", (req, res) => {
+app.get("/api/healthz", (req, res) => {
     res.status(200).json({ status: "ok" });
 });
 // Centralized error handler (must be last middleware)
