@@ -80,6 +80,16 @@ export const studentService = {
     return response.data;
   },
 
+  async updatePlatformUsername(platform, username) {
+    const response = await api.put(`/student/platforms/${platform}`, { username });
+    return response.data;
+  },
+
+  async deletePlatformUsername(platform) {
+    const response = await api.delete(`/student/platforms/${platform}`);
+    return response.data;
+  },
+
   async verifyPlatform(platform, username) {
     const response = await api.post('/student/verify', { platform, username });
     return response.data;

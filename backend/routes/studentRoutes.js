@@ -1,10 +1,12 @@
 const express = require("express");
 const router = express.Router();
 
-const { protect } = require("../middleware/authMiddleware");
+const { protect, authorize } = require("../middleware/authMiddleware");
 
 const {
     updatePlatforms,
+    updatePlatformUsername,
+    deletePlatformUsername,
     syncPlatformData,
     getStudentStats,
     getAnalytics,
@@ -18,6 +20,8 @@ router.post("/verify", protect, verifyPlatformUsername);
 
 // update usernames
 router.put("/platforms", protect, updatePlatforms);
+router.put("/platforms/:platform", protect, authorize("student"), updatePlatformUsername);
+router.delete("/platforms/:platform", protect, authorize("student"), deletePlatformUsername);
 
 // sync platform data
 router.post("/sync", protect, syncPlatformData);

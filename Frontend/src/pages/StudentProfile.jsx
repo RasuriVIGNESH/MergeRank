@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Layout } from '../components/Layout';
 import { studentService } from '../services/api';
 import { useParams } from 'react-router-dom';
-import { Github, Code2, Trophy, Award, BookOpen, Star, RefreshCw, Users } from 'lucide-react';
+import { Github, Code2, Trophy, Award, BookOpen, RefreshCw, Users, Pencil, Trash2, Check, X } from 'lucide-react';
 
 export function StudentProfile() {
   const { id } = useParams();
@@ -11,6 +11,8 @@ export function StudentProfile() {
   const [syncLoading, setSyncLoading] = useState(false);
   const [newPlatformInputs, setNewPlatformInputs] = useState({});
   const [connectingPlatform, setConnectingPlatform] = useState(null);
+  const [editingPlatform, setEditingPlatform] = useState(null);
+  const [savingPlatform, setSavingPlatform] = useState(null);
 
   const fetchProfile = async () => {
     try {
@@ -67,6 +69,59 @@ export function StudentProfile() {
       alert("Failed to connect: " + (err.response?.data?.message || err.message));
     } finally {
       setConnectingPlatform(null);
+    }
+  };
+
+  const startEditingPlatform = (platformId, username) => {
+    setEditingPlatform(platformId);
+    setNewPlatformInputs(prev => ({ ...prev, [platformId]: username || '' }));
+  };
+
+  const cancelEditingPlatform = (platformId) => {
+    setEditingPlatform(null);
+    setNewPlatformInputs(prev => ({ ...prev, [platformId]: '' }));
+  };
+
+  const handleUpdateUsername = async (platformId) => {
+    const username = (newPlatformInputs[platformId] || '').trim();
+    if (!username) {
+      alert('Username is required.');
+      return;
+    }
+
+    setSavingPlatform(platformId);
+    try {
+      const verifyRes = await studentService.verifyPlatform(platformId, username);
+      if (!verifyRes.isValid) {
+        alert(verifyRes.message || 'Invalid username.');
+        return;
+      }
+
+      await studentService.updatePlatformUsername(platformId, username);
+      await studentService.syncData();
+      await fetchProfile();
+      setEditingPlatform(null);
+      setNewPlatformInputs(prev => ({ ...prev, [platformId]: '' }));
+    } catch (err) {
+      alert('Failed to update username: ' + (err.response?.data?.message || err.message));
+    } finally {
+      setSavingPlatform(null);
+    }
+  };
+
+  const handleDeleteUsername = async (platformId) => {
+    if (!window.confirm(`Remove your ${platformId} username and platform data?`)) return;
+
+    setSavingPlatform(platformId);
+    try {
+      await studentService.deletePlatformUsername(platformId);
+      await fetchProfile();
+      setEditingPlatform(null);
+      setNewPlatformInputs(prev => ({ ...prev, [platformId]: '' }));
+    } catch (err) {
+      alert('Failed to delete username: ' + (err.response?.data?.message || err.message));
+    } finally {
+      setSavingPlatform(null);
     }
   };
 
@@ -230,7 +285,36 @@ export function StudentProfile() {
                     <h3 className={`font-bold ${platform.color}`}>{platform.name}</h3>
                   </div>
                   {platform.isConnected && platform.username && (
-                    <span className="text-sm mt-1 ml-9 font-medium text-slate-500">@{platform.username}</span>
+                    editingPlatform === platform.id && !id ? (
+                      <div className="flex items-center gap-2 mt-2 ml-9">
+                        <input
+                          type="text"
+                          value={newPlatformInputs[platform.id] || ''}
+                          onChange={(e) => setNewPlatformInputs(prev => ({ ...prev, [platform.id]: e.target.value }))}
+                          onKeyDown={(e) => { if (e.key === 'Enter') handleUpdateUsername(platform.id); if (e.key === 'Escape') cancelEditingPlatform(platform.id); }}
+                          autoFocus
+                          className="w-full min-w-0 px-2 py-1 border border-slate-200 rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        />
+                        <button
+                          onClick={() => handleUpdateUsername(platform.id)}
+                          disabled={savingPlatform === platform.id}
+                          aria-label={`Save ${platform.name} username`}
+                          className="p-1.5 text-emerald-600 hover:bg-emerald-100 rounded-md disabled:opacity-50"
+                        >
+                          <Check className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => cancelEditingPlatform(platform.id)}
+                          disabled={savingPlatform === platform.id}
+                          aria-label={`Cancel editing ${platform.name} username`}
+                          className="p-1.5 text-slate-500 hover:bg-slate-100 rounded-md disabled:opacity-50"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="text-sm mt-1 ml-9 font-medium text-slate-500">@{platform.username}</span>
+                    )
                   )}
                 </div>
                 {platform.isConnected ? (
@@ -253,13 +337,31 @@ export function StudentProfile() {
                   <div className="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
                     <span>Last synced: {platform.lastSynced ? new Date(platform.lastSynced).toLocaleString() : 'Not synced'}</span>
                     {!id && (
-                      <button
-                        onClick={handleSync}
-                        disabled={syncLoading}
-                        className="font-medium text-indigo-600 hover:text-indigo-700 disabled:opacity-50"
-                      >
-                        {syncLoading ? '...' : 'Sync'}
-                      </button>
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => startEditingPlatform(platform.id, platform.username)}
+                          disabled={savingPlatform === platform.id || editingPlatform === platform.id}
+                          className="inline-flex items-center gap-1 font-medium text-indigo-600 hover:text-indigo-700 disabled:opacity-50"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteUsername(platform.id)}
+                          disabled={savingPlatform === platform.id || editingPlatform === platform.id}
+                          className="inline-flex items-center gap-1 font-medium text-rose-600 hover:text-rose-700 disabled:opacity-50"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          Delete
+                        </button>
+                        <button
+                          onClick={handleSync}
+                          disabled={syncLoading || savingPlatform === platform.id}
+                          className="font-medium text-indigo-600 hover:text-indigo-700 disabled:opacity-50"
+                        >
+                          {syncLoading ? '...' : 'Sync'}
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>

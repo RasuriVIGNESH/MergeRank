@@ -1,5 +1,4 @@
 const User = require("../models/User");
-
 const { getLeetCodeStats } = require("../services/leetcodeService");
 const { getGithubStats, getGithubContributionCalendar } = require("../services/githubService");
 const { getCodeforcesStats } = require("../services/codeforcesService");
@@ -47,7 +46,7 @@ exports.verifyPlatformUsername = async (req, res) => {
 // UPDATE PLATFORM USERNAMES
 // -----------------------------
 // PUT /api/student/platforms
-exports.updatePlatforms = async (req, res) => {
+exports.updatePlatforms = async (req, res, next) => {
     try {
 
         const { leetcode, github, codeforces, codechef, hackerrank } = req.body;
@@ -71,6 +70,75 @@ exports.updatePlatforms = async (req, res) => {
             platforms: user.platforms
         });
 
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+// -----------------------------
+// UPDATE ONE PLATFORM USERNAME
+// -----------------------------
+// PUT /api/student/platforms/:platform
+exports.updatePlatformUsername = async (req, res, next) => {
+    try {
+        const allowedPlatforms = ["leetcode", "github", "codeforces", "codechef", "hackerrank"];
+        const { platform } = req.params;
+        const username = typeof req.body.username === "string" ? req.body.username.trim() : "";
+
+        if (!allowedPlatforms.includes(platform)) {
+            return res.status(400).json({ message: "Invalid platform." });
+        }
+
+        if (!username) {
+            return res.status(400).json({ message: "Username is required." });
+        }
+
+        const user = await User.findById(req.user._id);
+        if (!user) {
+            return res.status(404).json({ message: "User not found." });
+        }
+
+        user.platforms[platform] = { username };
+        await user.save();
+
+        return res.json({
+            message: `${platform} username updated successfully.`,
+            platform,
+            username: user.platforms[platform].username,
+            platforms: user.platforms
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// -----------------------------
+// DELETE ONE PLATFORM USERNAME
+// -----------------------------
+// DELETE /api/student/platforms/:platform
+exports.deletePlatformUsername = async (req, res, next) => {
+    try {
+        const allowedPlatforms = ["leetcode", "github", "codeforces", "codechef", "hackerrank"];
+        const { platform } = req.params;
+
+        if (!allowedPlatforms.includes(platform)) {
+            return res.status(400).json({ message: "Invalid platform." });
+        }
+
+        const user = await User.findById(req.user._id);
+        if (!user) {
+            return res.status(404).json({ message: "User not found." });
+        }
+
+        user.platforms[platform] = undefined;
+        await user.save();
+
+        return res.json({
+            message: `${platform} username deleted successfully.`,
+            platform,
+            platforms: user.platforms
+        });
     } catch (error) {
         next(error);
     }
